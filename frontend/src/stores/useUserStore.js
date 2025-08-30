@@ -38,9 +38,7 @@ export const useUserStore = create((set, get) => ({
       await axiosInstance.post("/auth/logout");
       set({ user: null });
     } catch (error) {
-      toast.error(
-        error.response?.data?.message || "An error occured during log out "
-      );
+      toast.error(error.message || "An error occured during log out ");
     }
   },
   checkAuth: async () => {
@@ -75,23 +73,26 @@ axiosInstance.interceptors.response.use(
     const originalRequest = error.config;
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
+
       try {
-        // If request already in progress, wait for it to complete
+        // If a refresh is already in progress, wait for it to complete
         if (refreshPromise) {
           await refreshPromise;
-          return axiosInstance(originalRequest);
+          return axios(originalRequest);
         }
-        //Start a new refresh process
+
+        // Start a new refresh process
         refreshPromise = useUserStore.getState().refreshToken();
         await refreshPromise;
         refreshPromise = null;
 
         return axiosInstance(originalRequest);
       } catch (refreshError) {
-        //If refresh fails, redirect to login or handle as needed
+        // If refresh fails, redirect to login or handle as needed
         useUserStore.getState().logout();
         return Promise.reject(refreshError);
       }
     }
+    return Promise.reject(error);
   }
 );
