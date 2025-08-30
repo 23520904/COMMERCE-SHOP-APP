@@ -28,11 +28,9 @@ export const useUserStore = create((set, get) => ({
     try {
       const res = await axiosInstance.post("/auth/login", { email, password });
       set({ user: res.data, loading: false });
-    } catch (err) {
+    } catch (error) {
       set({ loading: false });
-      toast.error(
-        err.response?.data?.message || "An error occured during log in"
-      );
+      toast.error(error.response.data.message || "An error occurred");
     }
   },
   logout: async () => {
@@ -41,7 +39,7 @@ export const useUserStore = create((set, get) => ({
       set({ user: null });
     } catch (error) {
       toast.error(
-        error.response?.data?.message || "An error occured during log out"
+        error.response?.data?.message || "An error occured during log out "
       );
     }
   },
@@ -64,7 +62,7 @@ export const useUserStore = create((set, get) => ({
       return response.data;
     } catch (error) {
       set({ user: null, checkingAuth: false });
-      throw error;  
+      throw error;
     }
   },
 }));
